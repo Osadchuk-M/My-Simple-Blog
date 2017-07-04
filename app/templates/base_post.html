@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ super() }}
+    Post Title
+{% endblock title %}
+
+{% block styles %}
+    {{ super() }}
+    <link href="{{ url_for('static', filename='css/blog-post.css') }}" rel="stylesheet">
+{% endblock styles %}
+
+{% block content %}
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <div class="row">
+
+            <!-- Blog Post Content Column -->
+            <div class="col-lg-8">
+
+                {% block post %}
+                {% endblock post %}
+
+                {% block comments %}
+                {% endblock comments %}
+
+            </div>
+
+            {% block sidebar %}
+                {{ super() }}
+            {% endblock sidebar %}
+
+        </div>
+        <!-- /.row -->
+
+        {% block footer %}
+            {{ super() }}
+        {% endblock footer %}
+
+    </div>
+    <!-- /.container -->
+{% endblock content %}

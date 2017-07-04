@@ -1,0 +1,9 @@
+.fa-spin {
+  -webkit-animation: fa-spin 1s infinite linear;
+  animation: fa-spin 1s infinite linear;
+}
+
+#commentator-name {
+  border-radius: 4px;
+  padding-left: 5px;
+}
