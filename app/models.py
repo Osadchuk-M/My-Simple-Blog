@@ -63,12 +63,31 @@ login_manager.anonymous_user = AnonymousUser
 class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(128))
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'), default=1)
 
     comments = db.relationship('Comment', backref='post', lazy='dynamic')
+
+    @staticmethod
+    def _bootstrap(reps=100):
+        from random import randint, choice
+        import forgery_py
+
+        themes = ['abstract', 'animals', 'business', 'cats',
+                  'city', 'food', 'nightlife', 'fashion',
+                  'people', 'nature', 'sports', 'technics', 'transport']
+        posts = [
+            Post(
+                title=forgery_py.lorem_ipsum.word(),
+                body='![image](http://lorempixel.com/900/300/' + choice(themes) + str(randint(1, 10)) + ')' + \
+                     forgery_py.lorem_ipsum.sentences(randint(5, 12)),
+                timestamp=forgery_py.date.date(True))
+            for _ in range(reps)]
+        db.session.add_all(posts)
+        db.session.commit()
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
@@ -78,6 +97,9 @@ class Post(db.Model):
         target.body_html = bleach.linkify(bleach.clean(
             markdown(value, output_format='html'),
             tags=allowed_tags, strip=True))
+
+    def __repr__(self):
+        return '<Post %r, timestamp: %r>' % (self.title, self.timestamp.strftime('%Y-%m-%d'))
 
 
 db.event.listen(Post.body, 'set', Post.on_changed_body)
@@ -92,3 +114,23 @@ class Comment(db.Model):
     author_name = db.Column(db.String(64))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    @staticmethod
+    def _bootstrap(reps=300):
+        from random import randint
+        import forgery_py
+        posts_count = Post.query.count()
+        comments = [
+            Comment(
+                body=forgery_py.lorem_ipsum.sentences(randint(1, 5)),
+                timestamp=forgery_py.date.date(True),
+                author_name=forgery_py.name.first_name(),
+                post_id=randint(1, posts_count)
+            )
+            for _ in range(reps)
+        ]
+        db.session.add_all(comments)
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Comment from %r, timestamp %r>' % (self.author_name, self.timestamp.strftime('%Y-%m-%d'))
