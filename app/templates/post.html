@@ -1,9 +1,8 @@
 {% extends 'base_post.html' %}
 
 {% block post %}
-    <!-- Blog Post -->
     <!-- Title -->
-    <h1>Blog Post Title</h1>
+    <h1>{{ post.title|title }}</h1>
 
     <!-- Author -->
     <p class="lead">
@@ -11,10 +10,10 @@
     </p>
     <hr>
     <!-- Date/Time -->
-    <p><span class="glyphicon glyphicon-time"></span> Posted on August 24, 2013 at 9:00 PM</p>
-
+    <p><span class="glyphicon glyphicon-time"></span> {{ moment(post.timestamp).fromNow() }} </p>
+    <!-- Post Body -->
     <hr>
-    Post HTML
+    {{ post.body_html|safe }}
     <hr>
 
 
@@ -30,6 +29,13 @@
                 <input class type="text" name="commentator-name" id="commentator-name">
                 <br>
                 <br>
+                <label for="photo-url">
+                    Add your photo url or miss
+                </label>
+                <br>
+                <input type="text" name="photo-url" id="photo-url">
+                <br>
+                <br>
                 <label for="comment">
                     Leave comment here.
                 </label>
@@ -43,33 +49,19 @@
 {% endblock post %}
 
 {% block comments %}
-    <!-- Comment -->
-    <div class="media">
-        <a class="pull-left" href="#">
-            <img class="media-object" src="http://placehold.it/64x64" alt="">
-        </a>
-        <div class="media-body">
-            <h4 class="media-heading">Commentator Name
-                <small>August 25, 2014 at 9:30 PM</small>
-            </h4>
-            Comment body Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            Asperiores dolorem facilis, impedit in incidunt itaque iure labore,
-            laborum nam neque nobis odit quam quis quod saepe sint suscipit velit vitae!
+    {% for comment in comments %}
+        <div class="media">
+            <a href="#" class="pull-left">
+                <img class="pull-left" src="{{ comment.avatar_hash }}" alt="avatar">
+            </a>
+            <div class="media-body">
+                <h4 class="media-body">
+                    {{ comment.author_name }}
+                    <small>{{ moment(comment.timestamp).fromNow() }}</small>
+                </h4>
+                {{ comment.body }}
+            </div>
         </div>
-    </div>
+    {% endfor %}
 
-    <!-- Comment -->
-    <div class="media">
-        <a class="pull-left" href="#">
-            <img class="media-object" src="http://placehold.it/64x64" alt="">
-        </a>
-        <div class="media-body">
-            <h4 class="media-heading">Start Bootstrap
-                <small>August 25, 2014 at 9:30 PM</small>
-            </h4>
-            Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo.
-            Cras purus odio, vestibulum in vulputate at, tempus viverra turpis.
-            Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-        </div>
-    </div>
 {% endblock comments %}

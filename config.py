@@ -16,7 +16,7 @@ class Config:
     MAIL_SENDER = 'My Simple Blog Admin <osadchuk.m.01@gmail.com>'
     ADMIN = os.environ.get('BLOG_ADMIN')
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
-    POSTS_PER_PAGE = 5
+    POSTS_PER_PAGE = 3
     COMMENTS_PER_PAGE = 5
     SLOW_DB_QUERY_TIME=0.5
 

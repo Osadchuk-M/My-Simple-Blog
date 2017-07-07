@@ -1,3 +1,4 @@
+import hashlib
 import os
 from datetime import datetime
 
@@ -14,7 +15,7 @@ class User(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64))
-    name = db.Column(db.String)
+    name = db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
     about_me = db.Column(db.Text)
     photo = db.Column(db.LargeBinary)
@@ -57,6 +58,7 @@ def load_user(user_id):
 class AnonymousUser(AnonymousUserMixin):
     is_admin = False
 
+
 login_manager.anonymous_user = AnonymousUser
 
 
@@ -82,8 +84,8 @@ class Post(db.Model):
         posts = [
             Post(
                 title=forgery_py.lorem_ipsum.word(),
-                body='![image](http://lorempixel.com/900/300/' + choice(themes) + str(randint(1, 10)) + ')' + \
-                     forgery_py.lorem_ipsum.sentences(randint(5, 12)),
+                body='![image](http://lorempixel.com/900/300/' + choice(themes) + '/' + str(randint(1, 10)) + ')' + \
+                     forgery_py.lorem_ipsum.sentences(randint(15, 50)),
                 timestamp=forgery_py.date.date(True))
             for _ in range(reps)]
         db.session.add_all(posts)
@@ -93,10 +95,11 @@ class Post(db.Model):
     def on_changed_body(target, value, oldvalue, initiator):
         allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
                         'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
-                        'h1', 'h2', 'h3', 'p']
+                        'h1', 'h2', 'h3', 'p', 'img']
+        allowed_attributes = ['alt', 'src']
         target.body_html = bleach.linkify(bleach.clean(
             markdown(value, output_format='html'),
-            tags=allowed_tags, strip=True))
+            tags=allowed_tags, attributes=allowed_attributes, strip=True))
 
     def __repr__(self):
         return '<Post %r, timestamp: %r>' % (self.title, self.timestamp.strftime('%Y-%m-%d'))
@@ -112,6 +115,7 @@ class Comment(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     disabled = db.Column(db.Boolean, default=False)
     author_name = db.Column(db.String(64))
+    avatar_hash = db.Column(db.String(32))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
@@ -122,15 +126,23 @@ class Comment(db.Model):
         posts_count = Post.query.count()
         comments = [
             Comment(
-                body=forgery_py.lorem_ipsum.sentences(randint(1, 5)),
+                body=forgery_py.lorem_ipsum.sentences(randint(1, 8)),
                 timestamp=forgery_py.date.date(True),
                 author_name=forgery_py.name.first_name(),
                 post_id=randint(1, posts_count)
             )
             for _ in range(reps)
         ]
+        [_.gravatar() for _ in comments]
         db.session.add_all(comments)
         db.session.commit()
+
+    def gravatar(self, size=64, default='identicon', rating='g'):
+        url = 'http://www.gravatar.com/avatar'
+        _hash = self.avatar_hash or hashlib.md5(
+            self.author_name.encode('utf-8')).hexdigest()
+        self.avatar_hash = '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+            url=url, hash=_hash, size=size, default=default, rating=rating)
 
     def __repr__(self):
         return '<Comment from %r, timestamp %r>' % (self.author_name, self.timestamp.strftime('%Y-%m-%d'))
