@@ -14,8 +14,8 @@ def home():
     return render_template('index.html', posts=posts, pagination=pagination)
 
 
-@main.route('/post/<int:post_id>')
-def post(post_id):
-    post = Post.query.get_or_404(post_id)
-    comments = Comment.query.order_by(Comment.timestamp.desc()).filter_by(post_id=post_id).all()
+@main.route('/post/<slug>')
+def post(slug):
+    post = Post.query.filter_by(slug=slug).first()
+    comments = Comment.query.order_by(Comment.timestamp.desc()).filter_by(post_id=post.id).all()
     return render_template('post.html', post=post, comments=comments)

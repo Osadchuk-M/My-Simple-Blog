@@ -2,9 +2,10 @@ import hashlib
 import os
 from datetime import datetime
 
+import bleach
 from flask_login import UserMixin, AnonymousUserMixin
 from markdown import markdown
-import bleach
+from slugify import slugify
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import db, login_manager
@@ -56,7 +57,8 @@ def load_user(user_id):
 
 
 class AnonymousUser(AnonymousUserMixin):
-    is_admin = False
+    def is_admin(self):
+        return False
 
 
 login_manager.anonymous_user = AnonymousUser
@@ -66,6 +68,7 @@ class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(128))
+    slug = db.Column(db.String(256), unique=True)
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
@@ -90,6 +93,21 @@ class Post(db.Model):
             for _ in range(reps)]
         db.session.add_all(posts)
         db.session.commit()
+        Post._create_slugs()
+
+    @staticmethod
+    def _create_slugs():
+        posts = Post.query.all()
+        [p._create_slug() for p in posts]
+        db.session.add_all(posts)
+        db.session.commit()
+
+    def _create_slug(self):
+        slug = slugify(self.title)
+        if not Post.query.filter_by(slug=slug).first():
+            self.slug = slug
+        else:
+            self.slug = slug + '-' + str(self.id)
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
