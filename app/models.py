@@ -1,8 +1,9 @@
 import hashlib
 import os
 from datetime import datetime
-
+from random import randint, choice
 import bleach
+import forgery_py
 from flask_login import UserMixin, AnonymousUserMixin
 from markdown import markdown
 from slugify import slugify
@@ -66,6 +67,7 @@ login_manager.anonymous_user = AnonymousUser
 
 class Post(db.Model):
     __tablename__ = 'posts'
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(128))
     slug = db.Column(db.String(256), unique=True)
@@ -78,9 +80,6 @@ class Post(db.Model):
 
     @staticmethod
     def _bootstrap(reps=100):
-        from random import randint, choice
-        import forgery_py
-
         themes = ['abstract', 'animals', 'business', 'cats',
                   'city', 'food', 'nightlife', 'fashion',
                   'people', 'nature', 'sports', 'technics', 'transport']
@@ -128,6 +127,7 @@ db.event.listen(Post.body, 'set', Post.on_changed_body)
 
 class Comment(db.Model):
     __tablename__ = 'comments'
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
@@ -139,8 +139,6 @@ class Comment(db.Model):
 
     @staticmethod
     def _bootstrap(reps=300):
-        from random import randint
-        import forgery_py
         posts_count = Post.query.count()
         comments = [
             Comment(
@@ -164,3 +162,21 @@ class Comment(db.Model):
 
     def __repr__(self):
         return '<Comment from %r, timestamp %r>' % (self.author_name, self.timestamp.strftime('%Y-%m-%d'))
+
+
+class Widget(db.Model):
+    __tablename__ = 'widget'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(128))
+    body = db.Column(db.Text())
+    last_modified = db.Column(db.DateTime, default=datetime.utcnow)
+
+    @staticmethod
+    def _bootstrap():
+        widget = Widget(title=forgery_py.lorem_ipsum.word(), body=forgery_py.lorem_ipsum.sentences(randint(2, 6)))
+        db.session.add(widget)
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Side Widget>'
