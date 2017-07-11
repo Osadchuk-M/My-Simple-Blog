@@ -67,6 +67,7 @@ login_manager.anonymous_user = AnonymousUser
 
 class Post(db.Model):
     __tablename__ = 'posts'
+    __searchable__ = ['title', 'body']
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(128))

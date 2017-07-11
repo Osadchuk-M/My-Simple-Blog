@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import flask_whooshalchemy as wa
 from app import create_app, db
 from app.models import User, Post, Comment, Widget
 from flask_script import Manager, Shell
@@ -8,6 +9,7 @@ from flask_migrate import Migrate, MigrateCommand
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 manager = Manager(app)
 migrate = Migrate(app, db)
+wa.whoosh_index(app, Post)
 
 
 def make_shell_context():

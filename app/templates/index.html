@@ -2,6 +2,12 @@
 
 
 {% block posts %}
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ message }}
+        </div>
+    {% endfor %}
 
     {% for post in posts %}
         <h2>
@@ -24,6 +30,7 @@
 {% endblock posts %}
 
 {% block pagination %}
+    {% if pagination is defined %}
     <ul class="pager">
         {% if pagination.has_prev %}
         <li class="previous">
@@ -36,4 +43,5 @@
         </li>
         {% endif %}
     </ul>
+    {% endif %}
 {% endblock pagination %}

@@ -55,6 +55,7 @@
         $(document).ready(
             $('#search-button').click(function () {
               $('.fa-refresh').toggleClass('fa-spin');
+              window.location.href = '/?search=' + $('#input-search').val()
             }),
             $('img').addClass('img-responsive')
         );
@@ -69,7 +70,9 @@
     <div class="well">
         <h4>Blog Search</h4>
         <div class="input-group">
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" id="input-search"
+                   {% if search is defined %} value={{ search }} {% endif %}
+            >
             <span class="input-group-btn">
                 <button id="search-button" class="btn btn-default" type="button">
                     <span class="glyphicon glyphicon-search"></span>
