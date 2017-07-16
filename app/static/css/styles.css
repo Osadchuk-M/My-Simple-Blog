@@ -17,3 +17,7 @@
 img {
   margin-bottom: 15px;
 }
+
+input[type="text"] {
+  width: 65%;
+}

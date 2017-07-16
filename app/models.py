@@ -133,7 +133,7 @@ class Comment(db.Model):
     body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     disabled = db.Column(db.Boolean, default=False)
-    author_name = db.Column(db.String(64))
+    author_email = db.Column(db.String(64))
     avatar_hash = db.Column(db.String(32))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -145,7 +145,7 @@ class Comment(db.Model):
             Comment(
                 body=forgery_py.lorem_ipsum.sentences(randint(1, 8)),
                 timestamp=forgery_py.date.date(True),
-                author_name=forgery_py.name.first_name(),
+                author_email=forgery_py.internet.email_address(),
                 post_id=randint(1, posts_count)
             )
             for _ in range(reps)
@@ -157,12 +157,12 @@ class Comment(db.Model):
     def gravatar(self, size=64, default='identicon', rating='g'):
         url = 'http://www.gravatar.com/avatar'
         _hash = self.avatar_hash or hashlib.md5(
-            self.author_name.encode('utf-8')).hexdigest()
+            self.author_email.encode('utf-8')).hexdigest()
         self.avatar_hash = '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
             url=url, hash=_hash, size=size, default=default, rating=rating)
 
     def __repr__(self):
-        return '<Comment from %r, timestamp %r>' % (self.author_name, self.timestamp.strftime('%Y-%m-%d'))
+        return '<Comment from %r, timestamp %r>' % (self.author_email, self.timestamp.strftime('%Y-%m-%d'))
 
 
 class Widget(db.Model):

@@ -1,6 +1,14 @@
 {% extends 'base_post.html' %}
 
 {% block post %}
+    {% block flash %}
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endblock flash %}
     <!-- Title -->
     <h1>{{ post.title|title }}</h1>
 
@@ -16,32 +24,25 @@
     {{ post.body_html|safe }}
     <hr>
 
-
-    <!-- Comments Form -->
     <div class="well">
-        <h4>Leave a Comment:</h4>
-        <form role="form">
+        <h4>Leave your comment, {{ current_user.name }}</h4>
+        <form action="{{ url_for('main.add_comment', post_id=post.id) }}" method="POST">
             <div class="form-group">
-                <label for="commentator-name">
-                    Enter your name
+                {{ form.csrf_token }}
+                <label for="email">
+                    Your email
                 </label>
-                <br>
-                <input class type="text" name="commentator-name" id="commentator-name">
-                <br>
-                <br>
-                <label for="photo-url">
-                    Add your photo url or miss
+                {% if not current_user.is_authenticated %}
+                    {{ form.email(class_='form-control') }}
+                {% else %}
+                    {{ form.email(class_='form-control', value=current_user.email) }}
+                {% endif %}
+                <label for="body">
+                    Your comment
                 </label>
-                <br>
-                <input type="text" name="photo-url" id="photo-url">
-                <br>
-                <br>
-                <label for="comment">
-                    Leave comment here.
-                </label>
-                <textarea class="form-control" rows="3"></textarea>
+                {{ form.body(class_='form-control', rows='4') }}
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            {{ form.submit(class_='btn btn-primary') }}
         </form>
     </div>
 
@@ -56,7 +57,7 @@
             </a>
             <div class="media-body">
                 <h4 class="media-body">
-                    {{ comment.author_name }}
+                    {{ comment.author_email }}
                     <small>{{ moment(comment.timestamp).fromNow() }}</small>
                 </h4>
                 {{ comment.body }}
