@@ -38,6 +38,23 @@
                         <a href="https://github.com/Osadchuk-M">Contact</a>
                     </li>
                 </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_authenticated %}
+                    <li>
+{#                        <a href="{{ url_for('admin.profile', user_id=current_user.id) }}">#}
+                        <a href="#">
+                            Hello, {{ current_user.name }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('auth.logout') }}">(Logout)</a>
+                    </li>
+                    {% else %}
+                        <li>
+                            <a href="{{ url_for('auth.login') }}">(Login)</a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
             <!-- /.navbar-collapse -->
         </div>
