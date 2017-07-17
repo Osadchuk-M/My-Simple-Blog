@@ -42,3 +42,8 @@
     </div>
     <!-- /.container -->
 {% endblock content %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/comment_form.js') }}"></script>
+{% endblock scripts %}

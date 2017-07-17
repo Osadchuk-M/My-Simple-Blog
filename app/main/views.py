@@ -1,4 +1,4 @@
-from flask import render_template, request, current_app, flash, redirect, url_for
+from flask import render_template, request, current_app, flash, redirect, url_for, jsonify
 from flask_login import current_user
 
 from . import main
@@ -27,27 +27,43 @@ def home():
         return render_template('index.html', posts=posts, pagination=pagination, widget=widget)
 
 
-@main.route('/post/<slug>')
+@main.route('/_post/<slug>')
 def post(slug):
-    post = Post.query.filter_by(slug=slug).first()
-    comments = Comment.query.order_by(Comment.timestamp.desc()).filter_by(post_id=post.id).all()
+    _post = Post.query.filter_by(slug=slug).first()
+    comments = Comment.query.order_by(Comment.timestamp.desc()).filter_by(post_id=_post.id).all()
     widget = Widget.query.first()
     form = CommentForm()
-    return render_template('post.html', post=post, comments=comments, widget=widget, form=form)
+    return render_template('post.html', post=_post, comments=comments, widget=widget, form=form)
 
 
-@main.route('/add_comment/<int:post_id>', methods=['POST'])
-def add_comment(post_id):
-    post = Post.query.get_or_404(post_id)
+@main.route('/add_comment/<post_slug>', methods=['POST'])
+def add_comment(post_slug):
+    _post = Post.query.filter_by(slug=post_slug).first()
     form = CommentForm()
     if form.validate_on_submit():
         comment = Comment(
             body=form.body.data,
             author_email=form.email.data,
-            post_id=post.id
+            post_id=_post.id
         )
         comment.gravatar()
         db.session.add(comment)
         db.session.commit()
-        flash('Your comment has been saved.')
-    return redirect(request.referrer)
+        return jsonify({
+            'message': {
+                'type': 'success',
+                'body': 'Your comment has been saved.'
+            },
+            'comment': {
+                'author_email': comment.author_email,
+                'avatar_hash': comment.avatar_hash,
+                'timestamp': comment.timestamp,
+                'body': comment.body
+            }
+        })
+    return jsonify({
+        'message': {
+            'type': 'fail',
+            'body': 'Your comment has not been saved.(Form is not valid)'
+        }
+    })

@@ -24,9 +24,9 @@
     {{ post.body_html|safe }}
     <hr>
 
-    <div class="well">
-        <h4>Leave your comment, {{ current_user.name }}</h4>
-        <form action="{{ url_for('main.add_comment', post_id=post.id) }}" method="POST">
+    <div class="well well-form">
+        <h4>Leave your comment, {% if current_user.name %}{{ current_user.name }}{% else %}Stranger{% endif %}</h4>
+        <form action="{{ url_for('main.add_comment', post_slug=post.slug) }}" method="POST">
             <div class="form-group">
                 {{ form.csrf_token }}
                 <label for="email">
