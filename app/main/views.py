@@ -27,7 +27,7 @@ def home():
         return render_template('index.html', posts=posts, pagination=pagination, widget=widget)
 
 
-@main.route('/_post/<slug>')
+@main.route('/post/<slug>')
 def post(slug):
     _post = Post.query.filter_by(slug=slug).first()
     comments = Comment.query.order_by(Comment.timestamp.desc()).filter_by(post_id=_post.id).all()
