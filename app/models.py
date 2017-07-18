@@ -48,6 +48,21 @@ class User(UserMixin, db.Model):
     def is_admin(self):
         return self.email == os.environ.get('ADMIN_EMAIL')
 
+    def update_about_me(self, markdown_data):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                            'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                            'h1', 'h2', 'h3', 'p', 'img']
+        allowed_attributes = ['alt', 'src']
+        self.about_me = bleach.linkify(bleach.clean(
+            markdown(markdown_data, output_format='html'),
+            tags=allowed_tags, attributes=allowed_attributes, strip=True))
+
+    def update_from_form(self, form):
+        self.email = form.email.data
+        self.name = form.name.data
+        self.location = form.location.data
+        self.update_about_me(form.about_me.data)
+
     def __repr__(self):
         return '<User %r>' % self.name
 
