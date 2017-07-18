@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}
+    {{ super() }}
+    Profile
+{% endblock title %}
+
+{% block styles %}
+    {{ super() }}
+    <link href="{{ url_for('static', filename='css/blog-post.css') }}" rel="stylesheet">
+{% endblock styles %}
+
+{% block content %}
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <div class="row">
+
+            <!-- Blog Post Content Column -->
+            <div class="col-lg-offset-3 col-lg-6">
+                {% block flash %}
+                    {{ super() }}
+                {% endblock flash %}
+                <br>
+                {{ wtf.quick_form(form) }}
+            </div>
+
+        </div>
+        <!-- /.row -->
+
+        {% block footer %}
+            {{ super() }}
+        {% endblock footer %}
+
+    </div>
+    <!-- /.container -->
+{% endblock content %}
+
+{% block scripts %}
+    {{ super() }}
+    {{ pagedown.include_pagedown() }}
+{% endblock scripts %}
