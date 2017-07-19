@@ -23,7 +23,7 @@ class EditProfileForm(FlaskForm):
 
 class PostForm(FlaskForm):
     title = StringField('Title', validators=[Required(), Length(1, 64)])
-    body = PageDownField('Your post', validators=[Required(), Length(1, 64)])
+    body = PageDownField('Your post', validators=[Required()])
     submit = SubmitField('Save the post.')
 
     def fill_the_form(self, post):

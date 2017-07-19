@@ -118,22 +118,39 @@ class Post(db.Model):
         db.session.commit()
 
     @staticmethod
+    def update_slug(target, value, old_value, initiator):
+        target._create_slug()
+
+    @staticmethod
     def create_from_form(form, author_id=1):
         post = Post(
             title=form.title.data,
             body=form.body.data,
             author_id=author_id
         )
-        post._create_slug()
         db.session.add(post)
         db.session.commit()
 
+    def update_from_form(self, form):
+        self.title = form.title.data
+        self.body = form.body.data
+        db.session.add(self)
+        db.session.commit()
+
+    def harakiri(self):
+        db.session.delete(self)
+        db.session.commit()
+
     def _create_slug(self):
-        slug = slugify(self.title)
-        if not Post.query.filter_by(slug=slug).first():
-            self.slug = slug
-        else:
-            self.slug = slug + '-' + str(self.id)
+        try:
+            slug = slugify(self.title.decode())
+            if not Post.query.filter_by(slug=slug).first():
+                self.slug = slug
+            else:
+                self.slug = slug + '-' + str(self.id)
+        except UnicodeEncodeError:
+            self.slug = self.id
+
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
@@ -150,6 +167,7 @@ class Post(db.Model):
 
 
 db.event.listen(Post.body, 'set', Post.on_changed_body)
+db.event.listen(Post.title, 'set', Post.update_slug)
 
 
 class Comment(db.Model):

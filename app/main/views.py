@@ -30,10 +30,12 @@ def home():
 @main.route('/post/<slug>')
 def post(slug):
     _post = Post.query.filter_by(slug=slug).first()
-    comments = Comment.query.order_by(Comment.timestamp.desc()).filter_by(post_id=_post.id).all()
-    widget = Widget.query.first()
-    form = CommentForm()
-    return render_template('post.html', post=_post, comments=comments, widget=widget, form=form)
+    if _post:
+        comments = Comment.query.order_by(Comment.timestamp.desc()).filter_by(post_id=_post.id).all()
+        widget = Widget.query.first()
+        form = CommentForm()
+        return render_template('post.html', post=_post, comments=comments, widget=widget, form=form)
+    return redirect(url_for('main.home'))
 
 
 @main.route('/add_comment/<post_slug>', methods=['POST'])
