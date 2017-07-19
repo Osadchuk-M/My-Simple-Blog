@@ -117,6 +117,17 @@ class Post(db.Model):
         db.session.add_all(posts)
         db.session.commit()
 
+    @staticmethod
+    def create_from_form(form, author_id=1):
+        post = Post(
+            title=form.title.data,
+            body=form.body.data,
+            author_id=author_id
+        )
+        post._create_slug()
+        db.session.add(post)
+        db.session.commit()
+
     def _create_slug(self):
         slug = slugify(self.title)
         if not Post.query.filter_by(slug=slug).first():

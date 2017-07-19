@@ -20,3 +20,16 @@ class EditProfileForm(FlaskForm):
         self.location.data = user.location or ''
         self.about_me = user.about_me or ''
 
+
+class PostForm(FlaskForm):
+    title = StringField('Title', validators=[Required(), Length(1, 64)])
+    body = PageDownField('Your post', validators=[Required(), Length(1, 64)])
+    submit = SubmitField('Save the post.')
+
+    def fill_the_form(self, post):
+        self.title.data = post.title
+        self.body.data = post.body
+
+    def clear_fields(self):
+        self.title.data, self.body.data = '', ''
+
