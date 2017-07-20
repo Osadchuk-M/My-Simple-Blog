@@ -3,7 +3,7 @@
 
 {% block title %}
     {{ super() }}
-    Profile
+    Admin
 {% endblock title %}
 
 {% block styles %}
@@ -19,13 +19,14 @@
         <div class="row">
 
             <!-- Blog Post Content Column -->
-            <div class="col-lg-offset-3 col-lg-6">
-                {% block flash %}
-                    {{ super() }}
-                {% endblock flash %}
-                <br>
-                {{ wtf.quick_form(form) }}
+            <div class="col-lg-offset-2 col-lg-8">
+                <div class="list-group">
+                  <a href="{{ url_for('admin.profile', user_id=current_user.id) }}" class="list-group-item">Edit profile</a>
+                  <a href="{{ url_for('admin.create_post') }}" class="list-group-item">Create Post</a>
+                  <a href="{{ url_for('admin.posts_list') }}" class="list-group-item">Update Posts<span class="badge">{{ posts_count }}</span></a>
+                </div>
             </div>
+
         </div>
         <!-- /.row -->
 
@@ -39,5 +40,4 @@
 
 {% block scripts %}
     {{ super() }}
-    {{ pagedown.include_pagedown() }}
 {% endblock scripts %}

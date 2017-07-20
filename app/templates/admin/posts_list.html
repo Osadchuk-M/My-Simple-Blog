@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}
+    {{ super() }}
+    Posts
+{% endblock title %}
+
+{% block styles %}
+    {{ super() }}
+    <link href="{{ url_for('static', filename='css/blog-post.css') }}" rel="stylesheet">
+{% endblock styles %}
+
+{% block content %}
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <div class="row">
+
+            <!-- Blog Post Content Column -->
+            <div class="col-lg-offset-2 col-lg-8">
+                <div class="list-group">
+                  {% for post in posts %}
+                    <a
+                        href="{{ url_for('admin.update_post', post_id=post.id) }}"
+                        class="list-group-item">
+                        {{ post.title }}
+                        <span class="badge" style="background-color: #1a14ff">Edit</span>
+                    </a>
+                  {% endfor %}
+                </div>
+                <ul class="pager">
+                    {% if pagination.has_prev %}
+                    <li class="previous">
+                        <a href="{{ url_for('admin.posts_list', page=pagination.prev_num) }}">&larr; Newer</a>
+                    </li>
+                    {% endif %}
+                    {% if pagination.has_next %}
+                    <li class="next">
+                        <a href="{{ url_for('admin.posts_list', page=pagination.next_num) }}">Older &rarr;</a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+            </div>
+
+        </div>
+        <!-- /.row -->
+
+        {% block footer %}
+            {{ super() }}
+        {% endblock footer %}
+
+    </div>
+    <!-- /.container -->
+{% endblock content %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock scripts %}

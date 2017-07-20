@@ -30,6 +30,9 @@
                 {% endblock flash %}
                 <br>
                 {{ wtf.quick_form(form) }}
+                <form action="{{ url_for('admin.posts_list') }}" style="margin-top: 10px;">
+                    <input class="btn btn-info" type="submit" value="View all posts" />
+                </form>
                 <form action="{{ url_for('admin.delete_post', post_id=post_id) }}" style="margin-top: 10px;">
                     <input class="btn btn-danger" type="submit" value="Delete post" />
                 </form>

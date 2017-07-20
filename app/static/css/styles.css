@@ -21,3 +21,7 @@ img {
 input[type="text"] {
   width: 65%;
 }
+
+#flask-pagedown-body {
+  margin-bottom: 25px;
+}

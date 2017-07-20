@@ -19,6 +19,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64))
     name = db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
+    about_me_md = db.Column(db.Text)
     about_me = db.Column(db.Text)
     photo = db.Column(db.LargeBinary)
     location = db.Column(db.String(64))
@@ -53,6 +54,7 @@ class User(UserMixin, db.Model):
                             'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
                             'h1', 'h2', 'h3', 'p', 'img']
         allowed_attributes = ['alt', 'src']
+        self.about_me_md = markdown_data
         self.about_me = bleach.linkify(bleach.clean(
             markdown(markdown_data, output_format='html'),
             tags=allowed_tags, attributes=allowed_attributes, strip=True))
@@ -119,7 +121,8 @@ class Post(db.Model):
 
     @staticmethod
     def update_slug(target, value, old_value, initiator):
-        target._create_slug()
+        if target.title:
+            target._create_slug()
 
     @staticmethod
     def create_from_form(form, author_id=1):

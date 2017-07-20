@@ -18,7 +18,7 @@ class EditProfileForm(FlaskForm):
         self.email.data = user.email or ''
         self.name.data = user.name or ''
         self.location.data = user.location or ''
-        self.about_me = user.about_me or ''
+        self.about_me = user.about_me_md or ''
 
 
 class PostForm(FlaskForm):

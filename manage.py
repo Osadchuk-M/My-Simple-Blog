@@ -25,6 +25,16 @@ manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
 
+@manager.command
+def bootstrap():
+    """ Create database with fake data """
+    db.create_all()
+    Post._bootstrap()
+    Comment._bootstrap()
+    Widget._bootstrap()
+    db.session.add(User(email='osadchuk.m.01@gmail.com', name='Maxim', password='1111'))
+    db.session.commit()
+
 # @manager.command
 # def test(coverage=False):
 #     """Run the unit tests."""

@@ -17,6 +17,7 @@ class Config:
     ADMIN = os.environ.get('BLOG_ADMIN')
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
     POSTS_PER_PAGE = 3
+    ADMIN_POSTS_PER_PAGE = 30
     COMMENTS_PER_PAGE = 5
     SLOW_DB_QUERY_TIME = 0.5
     WHOOSH_BASE = os.path.join(basedir, 'whoosh_index')
