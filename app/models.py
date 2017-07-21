@@ -4,7 +4,9 @@ from datetime import datetime
 from random import randint, choice
 import bleach
 import forgery_py
+from flask import current_app
 from flask_login import UserMixin, AnonymousUserMixin
+from itsdangerous import Serializer
 from markdown import markdown
 from slugify import slugify
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -64,6 +66,20 @@ class User(UserMixin, db.Model):
         self.name = form.name.data
         self.location = form.location.data
         self.update_about_me(form.about_me.data)
+
+    def generate_auth_token(self, expiration):
+        s = Serializer(current_app['SECRET_KEY'], expires_in=expiration)
+        return s.dumps({'id': self.id})
+
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(current_app['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return None
+        return User.query.get(data['id'])
+
 
     def __repr__(self):
         return '<User %r>' % self.name
