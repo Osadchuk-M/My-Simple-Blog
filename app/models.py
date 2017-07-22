@@ -4,7 +4,7 @@ from datetime import datetime
 from random import randint, choice
 import bleach
 import forgery_py
-from flask import current_app
+from flask import current_app, url_for
 from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import Serializer
 from markdown import markdown
@@ -12,6 +12,7 @@ from slugify import slugify
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import db, login_manager
+from .exceptions import ValidationError
 
 
 class User(UserMixin, db.Model):
@@ -80,6 +81,15 @@ class User(UserMixin, db.Model):
             return None
         return User.query.get(data['id'])
 
+    def to_json(self):
+        return {
+            'url': url_for('api.get_user', user_id=self.id, _external=True),
+            'username': self.name,
+            'member_since': self.member_since,
+            'last_seen': self.last_seen,
+            'posts': url_for('api.get_user_posts', user_id=self.id, _external=True),
+            'post_count': self.posts.count()
+        }
 
     def __repr__(self):
         return '<User %r>' % self.name
@@ -181,6 +191,26 @@ class Post(db.Model):
             markdown(value, output_format='html'),
             tags=allowed_tags, attributes=allowed_attributes, strip=True))
 
+    @staticmethod
+    def from_json(json_post):
+        body = json_post.get('body')
+        title = json_post.get('title')
+        if not body or not title:
+            raise ValidationError('Post does not have a title or body')
+        return Post(title=title, body=body)
+
+    def to_json(self):
+        return {
+            'url': url_for('main.post', post_slug=self.slug, _external=True),
+            'title': self.title,
+            'timestamp': self.timestamp,
+            'body': self.body,
+            'body_html': self.body_html,
+            'author': url_for('api.get_user', user_id=self.author_id, _external=True),
+            'comments': url_for('api.get_posts_comments', post_id=self.id, _external=True),
+            'comments_count': self.comments.count()
+        }
+
     def __repr__(self):
         return '<Post %r, timestamp: %r>' % (self.title, self.timestamp.strftime('%Y-%m-%d'))
 
@@ -216,6 +246,24 @@ class Comment(db.Model):
         [_.gravatar() for _ in comments]
         db.session.add_all(comments)
         db.session.commit()
+
+    @staticmethod
+    def from_json(comment_json):
+        body = comment_json.get('body')
+        author_email = comment_json.get('author_email')
+        if not body or not author_email:
+            raise ValidationError('Comment does not have a body or author email')
+        return Comment(author_email=author_email, body=body)
+
+    def to_json(self):
+        return {
+            'url': url_for('api.get_comment', comment_id=self.id, _external=True),
+            'post': url_for('api.get_post', post_id=self.post_id, _external=True),
+            'body': self.body,
+            'timestamp': self.timestamp,
+            'author': url_for('api.get_user', user_id=self.author_id,
+                              _external=True),
+        }
 
     def gravatar(self, size=64, default='identicon', rating='g'):
         url = 'http://www.gravatar.com/avatar'
