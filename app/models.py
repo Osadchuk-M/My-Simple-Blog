@@ -201,7 +201,7 @@ class Post(db.Model):
 
     def to_json(self):
         return {
-            'url': url_for('main.post', post_slug=self.slug, _external=True),
+            'url': url_for('api.get_post', post_id=self.id, _external=True),
             'title': self.title,
             'timestamp': self.timestamp,
             'body': self.body,
@@ -256,13 +256,16 @@ class Comment(db.Model):
         return Comment(author_email=author_email, body=body)
 
     def to_json(self):
+        if self.author_id:
+            author = url_for('api.get_user', user_id=self.author_id, _external=True)
+        else:
+            author = self.author_email
         return {
             'url': url_for('api.get_comment', comment_id=self.id, _external=True),
             'post': url_for('api.get_post', post_id=self.post_id, _external=True),
             'body': self.body,
             'timestamp': self.timestamp,
-            'author': url_for('api.get_user', user_id=self.author_id,
-                              _external=True),
+            'author': author,
         }
 
     def gravatar(self, size=64, default='identicon', rating='g'):
