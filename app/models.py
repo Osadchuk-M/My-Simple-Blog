@@ -91,6 +91,11 @@ class User(UserMixin, db.Model):
             'post_count': self.posts.count()
         }
 
+    @staticmethod
+    def check_auth(username, password):
+        user = User.query.filter_by(name=username).first()
+        return user and user.verify_password(password)
+
     def __repr__(self):
         return '<User %r>' % self.name
 
