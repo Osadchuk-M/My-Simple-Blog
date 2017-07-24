@@ -1,8 +1,12 @@
 import datetime
 from functools import wraps
-from flask import request, make_response, jsonify, current_app
+
 import jwt
+from flask import request, jsonify, current_app
+
 from . import api
+from .errors import bad_request, unauthorized, forbidden
+from ..models import User
 
 
 def token_required(f):
@@ -10,22 +14,42 @@ def token_required(f):
     def decorated(*args, **kwargs):
         token = request.args.get('token')
         if not token:
-            return jsonify({'message': 'Token is missing.'}), 403
+            return forbidden('Token is missing.')
         try:
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
+        except jwt.ExpiredSignatureError:
+            return unauthorized('Token is expired.')
         except:
-            return jsonify({'message': 'Token is invalid.'}), 403
+            return forbidden('Token is invalid.')
         return f(*args, **kwargs)
     return decorated
 
 
-@api.route('/token')
-def login():
+@api.route('/token')  # token for 30 minutes
+def get_access_token():
     auth = request.authorization
-    if auth and auth.password == 'password' and auth.username == 'Maxim':
+    if User.check_auth(auth.username, auth.password):
         token = jwt.encode({'user': auth.username,
                             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
                            current_app.config['SECRET_KEY'])
         return jsonify({'token': token.decode('UTF-8')})
+    return unauthorized('Could not verify.')
 
-    return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+@api.route('/refresh_token')  # token for 8 hours
+def get_refresh_token():
+    auth = request.authorization
+    token = request.args.get('token')
+    if User.check_auth(auth.username, auth.password):
+        if token:
+            try:
+                jwt.decode(token, current_app.config['SECRET_KEY'])
+                return bad_request('Token is not expired.')
+            except jwt.ExpiredSignatureError:
+                token = jwt.encode({
+                    'user': auth.username,
+                    'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=8)
+                }, current_app.config['SECRET_KEY'])
+                return jsonify({'token': token.decode('UTF-8')})
+        return bad_request('Token is missing.')
+    return unauthorized('Could not verify.')
