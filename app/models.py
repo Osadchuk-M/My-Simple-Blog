@@ -68,24 +68,10 @@ class User(UserMixin, db.Model):
         self.location = form.location.data
         self.update_about_me(form.about_me.data)
 
-    def generate_auth_token(self, expiration):
-        s = Serializer(current_app['SECRET_KEY'], expires_in=expiration)
-        return s.dumps({'id': self.id})
-
-    @staticmethod
-    def verify_auth_token(token):
-        s = Serializer(current_app['SECRET_KEY'])
-        try:
-            data = s.loads(token)
-        except:
-            return None
-        return User.query.get(data['id'])
-
     def to_json(self):
         return {
             'url': url_for('api.get_user', user_id=self.id, _external=True),
             'username': self.name,
-            'member_since': self.member_since,
             'last_seen': self.last_seen,
             'posts': url_for('api.get_user_posts', user_id=self.id, _external=True),
             'post_count': self.posts.count()

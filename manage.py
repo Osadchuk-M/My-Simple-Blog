@@ -35,21 +35,13 @@ def bootstrap():
     db.session.add(User(email='osadchuk.m.01@gmail.com', name='Maxim', password='1111'))
     db.session.commit()
 
-# @manager.command
-# def test(coverage=False):
-#     """Run the unit tests."""
-#     import unittest
-#     tests = unittest.TestLoader().discover('tests')
-#     unittest.TextTestRunner(verbosity=2).run(tests)
 
-
-# @manager.command
-# def profile(length=25, profile_dir=None):
-#     """Start the application under the code profiler."""
-#     from werkzeug.contrib.profiler import ProfilerMiddleware
-#     app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[length],
-#                                       profile_dir=profile_dir)
-#     app.run()
+@manager.command
+def test(coverage=False):
+    """Run the unit tests."""
+    import unittest
+    tests = unittest.TestLoader().discover('tests')
+    unittest.TextTestRunner(verbosity=2).run(tests)
 
 
 if __name__ == '__main__':
