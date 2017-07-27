@@ -171,7 +171,6 @@ class Post(db.Model):
         except UnicodeEncodeError:
             self.slug = self.id
 
-
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
         allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
@@ -184,8 +183,8 @@ class Post(db.Model):
 
     @staticmethod
     def from_json(json_post):
-        body = json_post.get('body')
         title = json_post.get('title')
+        body = json_post.get('body')
         if not body or not title:
             raise ValidationError('Post does not have a title or body')
         return Post(title=title, body=body)

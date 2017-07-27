@@ -92,3 +92,7 @@ class UserModelTestCase(unittest.TestCase):
         db.session.add(self.user); db.session.commit()
         self.assertTrue(User.check_auth('Maxim', '1111'))
         self.assertFalse(User.check_auth('Bad Name', 'bad password'))
+
+
+if __name__ == '__main__':
+    unittest.main()
