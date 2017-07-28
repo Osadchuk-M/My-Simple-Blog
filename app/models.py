@@ -2,11 +2,11 @@ import hashlib
 import os
 from datetime import datetime
 from random import randint, choice
+
 import bleach
 import forgery_py
-from flask import current_app, url_for
+from flask import url_for
 from flask_login import UserMixin, AnonymousUserMixin
-from itsdangerous import Serializer
 from markdown import markdown
 from slugify import slugify
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -240,8 +240,8 @@ class Comment(db.Model):
 
     @staticmethod
     def from_json(comment_json):
-        body = comment_json.get('body')
         author_email = comment_json.get('author_email')
+        body = comment_json.get('body')
         if not body or not author_email:
             raise ValidationError('Comment does not have a body or author email')
         return Comment(author_email=author_email, body=body)
