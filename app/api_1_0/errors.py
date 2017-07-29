@@ -3,6 +3,7 @@ from ..exceptions import ValidationError
 from . import api
 
 
+@api.errorhandler(400)
 def bad_request(message):
     response = jsonify({'error': 'bad request', 'message': message})
     response.status_code = 400

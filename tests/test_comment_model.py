@@ -29,9 +29,13 @@ class CommentModelTestCase(unittest.TestCase):
             self.comment = Comment.from_json({})
 
     def test_to_json(self):
-        self.comment = Comment(author_email='john@example.com', body='lorem ipsum', timestamp=datetime.utcnow())
+        self.comment = Comment(author_email='john@example.com', body='lorem ipsum',
+                               timestamp=datetime.utcnow(), post_id=1)
+        db.session.add(self.comment)
+        db.session.commit()
         json_comment = self.comment.to_json()
         self.assertEqual(self.comment.author_email, json_comment['author'])
+        self.comment.author_id = 1
         db.session.add(self.comment)
         db.session.commit()
         json_comment = self.comment.to_json()

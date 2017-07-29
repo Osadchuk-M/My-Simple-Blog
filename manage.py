@@ -40,6 +40,7 @@ def bootstrap():
     Comment._bootstrap()
     Widget._bootstrap()
     os.environ['ADMIN_EMAIL'] = 'osadchuk.m.01@gmail.com'
+    os.environ['ADMIN_PASSWORD'] = '1111'
     db.session.add(User(email='osadchuk.m.01@gmail.com', name='Maxim', password='1111'))
     db.session.commit()
 
