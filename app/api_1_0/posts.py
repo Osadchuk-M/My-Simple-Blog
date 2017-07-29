@@ -1,12 +1,14 @@
 from flask import jsonify, request, url_for, current_app
 
 from . import api
+from .authentication import token_required
 from .errors import forbidden
 from .. import db
 from ..models import Post, Comment
 
 
 @api.route('/posts/')
+@token_required
 def get_posts():
     page = request.args.get('page', 1, type=int)
     pagination = Post.query.paginate(
@@ -28,12 +30,14 @@ def get_posts():
 
 
 @api.route('/posts/<int:post_id>')
+@token_required
 def get_post(post_id):
     post = Post.query.get_or_404(post_id)
     return jsonify(post.to_json())
 
 
 @api.route('/posts/', methods=['POST'])
+@token_required
 def new_post():
     post = Post.from_json(request.json)
     post.author = g.current_user
@@ -43,6 +47,7 @@ def new_post():
 
 
 @api.route('/posts/<int:post_id>', methods=['PUT'])
+@token_required
 def edit_post(post_id):
     post = Post.query.get_or_404(post_id)
     if g.current_user != post.author:
@@ -53,6 +58,7 @@ def edit_post(post_id):
 
 
 @api.route('/posts/<int:post_id>', methods=['DELETE'])
+@token_required
 def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
     db.session.delete(post)
@@ -60,6 +66,7 @@ def delete_post(post_id):
 
 
 @api.route('/posts/<int:post_id>/comments', methods=['GET'])
+@token_required
 def get_posts_comments(post_id):
     post = Post.query.get_or_404(post_id)
     comments = post.comments.all()
@@ -67,6 +74,7 @@ def get_posts_comments(post_id):
 
 
 @api.route('/posts/<int:post_id>/comments', methods=['POST'])
+@token_required
 def new_comment(post_id):
     post = Post.query.get_or_404(post_id)
     comment = Comment.from_json(request.json)

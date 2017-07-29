@@ -14,7 +14,7 @@ def token_required(f):
     def decorated(*args, **kwargs):
         token = request.args.get('token')
         if not token:
-            return forbidden('Token is missing.')
+            return unauthorized('Token is missing.')
         try:
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
         except jwt.ExpiredSignatureError:
