@@ -2,3 +2,5 @@
 *.sqlite
 *.sqlite-journal
 *.idea
+env
+venv
