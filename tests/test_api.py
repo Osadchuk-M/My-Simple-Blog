@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import url_for, json
 
 from app import create_app, db
-from app.models import User, Comment
+from app.models import User, Comment, Post
 
 
 class APITestCase(unittest.TestCase):
@@ -52,13 +52,13 @@ class APITestCase(unittest.TestCase):
         expected_keys = ['url', 'username', 'last_seen', 'posts', 'post_count']
         self.assertEqual(sorted(data.keys()), sorted(expected_keys))
 
-        # test for users/1/posts
+        # test for GET users/1/posts
 
         response = self.client.get(url_for('api.get_user_posts', user_id=1) + '?token=%s' % self.token)
         self.assertEqual(response.status_code, 404)
 
     def test_comments(self):
-        # test for comments/
+        # test for GET comments/
         response = self.client.get(url_for('api.get_comments') + '?token=%s' % self.token)
         self.assertEqual(response.status_code, 404)
         comment = Comment(author_email='john@example.com', body='lorem ipsum',
@@ -68,9 +68,58 @@ class APITestCase(unittest.TestCase):
         response = self.client.get(url_for('api.get_comments') + '?token=%s' % self.token)
         self.assertNotEqual(response.status_code, 404)
 
-        # test for comments/1
+        # test for GET comments/1
         response = self.client.get(url_for('api.get_comment', comment_id=1) + '?token=%s' % self.token)
         self.assertEqual(response.status_code, 200)
+
+    def test_posts(self):
+        # test for GET posts/
+        response = self.client.get(url_for('api.get_posts') + '?token=%s' % self.token)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+        expected_keys = ['posts', 'prev', 'next', 'count']
+        self.assertEqual(sorted(data.keys()), sorted(expected_keys))
+
+        # test for GET posts/1
+        p = Post(title='post title', body='post body')
+        db.session.add(p)
+        db.session.commit()
+        response = self.client.get(url_for('api.get_post', post_id=1) + '?token=%s' % self.token)
+        self.assertEqual(response.status_code, 200)
+
+        # test for POST posts/
+        response = self.client.post(
+            url_for('api.new_post') + '?token=%s' % self.token,
+            data=json.dumps({'title': 'title from json', 'body': 'body from json'}),
+            headers={'Accept': 'application/json',
+                     'Content-Type': 'application/json'}
+        )
+        self.assertEqual(response.status_code, 201)
+
+        # test for PUT posts/2
+        response = self.client.put(
+            url_for('api.edit_post', post_id=2) + '?token=%s' % self.token,
+            data=json.dumps({'body': 'new post body from json'}),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # test for DELETE posts/2
+        response = self.client.delete(url_for('api.delete_post', post_id=2) + '?token=%s' % self.token)
+        data = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(data['message'], 'post has been deleted.')
+
+        # test for POST posts/1/comments
+        response = self.client.post(
+            url_for('api.new_comment', post_id=1) + '?token=%s' % self.token.encode('utf-8'),
+            data=json.dumps({'author_email': 'john@example.com', 'body': 'lorem ipsum'}),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 201)
+
+        # test for GET posts/1/comments
+        response = self.client.get(url_for('api.get_posts_comments', post_id=1) + '?token=%s' % self.token)
+        self.assertNotEqual(response.status_code, 404)
 
 
 if __name__ == '__main__':
