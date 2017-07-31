@@ -22,6 +22,7 @@ class Config:
     SLOW_DB_QUERY_TIME = 0.5
     WHOOSH_BASE = os.path.join(basedir, 'whoosh_index')
     enable_search = True
+    SSL_DISABLE = True
 
     @staticmethod
     def init_app(app):
@@ -44,6 +45,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
                               'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+    SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
 
 
 config = {
